@@ -1,97 +1,32 @@
-// ignore_for_file: prefer_const_constructors
-
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(MyFirstApp());
+void main() => runApp(MyApp());
 
-class MyFirstApp extends StatefulWidget {
-  @override
-  State<StatefulWidget> createState() {
-    return _MyFirstAppState();
-  }
-}
-
-class _MyFirstAppState extends State<MyFirstApp> {
-  bool _loading = false;
-  double _progressValue = 0;
-
-  @override
-  void initState() {
-    _loading = false;
-    _progressValue = 0;
-    super.initState();
-  }
-
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-        backgroundColor: Colors.indigo,
-        appBar: AppBar(
-          leading: Icon(Icons.facebook),
-          title: const Text("facebook"),
-          centerTitle: true,
-        ),
-        body: bodyWidget(),
+      theme: ThemeData(
+          colorScheme: ColorScheme.fromSwatch(
+              primarySwatch: Colors.red, accentColor: Colors.blueAccent)),
+      home: MyAppHome(),
+    );
+  }
+}
+
+class MyAppHome extends StatelessWidget {
+  Widget build(BuildContext context) {
+    return Scaffold(
         floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            setState(() {
-              _loading = !_loading;
-              _updateProgress();
-            });
-          },
-          child: Icon(Icons.cloud_download),
+          onPressed: () {},
         ),
-      ),
-    );
-  }
-
-  Widget bodyWidget() {
-    return Container(
-      padding: EdgeInsets.all(10),
-      child: Center(
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          child: _loading
-              ? Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    LinearProgressIndicator(value: _progressValue),
-                    Text(
-                      '${(_progressValue * 100).round()}%',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                      ),
-                    ),
-                  ],
-                )
-              : Text(
-                  "Press button to download",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                  ),
-                ),
-        ),
-      ),
-    );
-  }
-
-  void _updateProgress() {
-    const oneSec = Duration(seconds: 1);
-    Timer.periodic(oneSec, (Timer t) {
-      setState(() {
-        _progressValue += 0.02;
-        if (_progressValue.toStringAsFixed(1) == '1.0') {
-          _loading = false;
-          t.cancel();
-          _progressValue = 0.0;
-          return;
-        }
-      });
-    });
+        appBar: AppBar(
+            leading: Icon(Icons.android_sharp),
+            title: const Text('Flutter course')),
+        body: Center(
+            child: Column(children: [
+          FlutterLogo(size: 300, style: FlutterLogoStyle.horizontal),
+          ElevatedButton(child: Text("Enroll to Course"), onPressed: () {})
+        ])));
   }
 }
