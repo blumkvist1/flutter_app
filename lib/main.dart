@@ -1,97 +1,89 @@
-// ignore_for_file: prefer_const_constructors
-
-import 'dart:async';
-
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
-void main() => runApp(MyFirstApp());
+import 'AddPostScreen.dart' as AddPostScreen;
+import 'Post.dart';
 
-class MyFirstApp extends StatefulWidget {
-  @override
-  State<StatefulWidget> createState() {
-    return _MyFirstAppState();
-  }
-}
+void main() => runApp(MyApp());
 
-class _MyFirstAppState extends State<MyFirstApp> {
-  bool _loading = false;
-  double _progressValue = 0;
-
-  @override
-  void initState() {
-    _loading = false;
-    _progressValue = 0;
-    super.initState();
-  }
+class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-        backgroundColor: Colors.indigo,
+      theme: ThemeData(
+          colorScheme: ColorScheme.fromSwatch(
+              primarySwatch: Colors.teal, accentColor: Colors.blueGrey)),
+      home: MyHomePage(),
+    );
+  }
+}
+
+class MyHomePage extends StatefulWidget {
+  MyHomePage({Key? key}) : super(key: key);
+
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  List<Post> posts = [];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
         appBar: AppBar(
-          leading: Icon(Icons.facebook),
-          title: const Text("facebook"),
-          centerTitle: true,
+          title: Text("Posts List"),
         ),
-        body: bodyWidget(),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            setState(() {
-              _loading = !_loading;
-              _updateProgress();
-            });
+            //Navigator.push(context, AddPostScreen.getRoute(context));
           },
-          child: Icon(Icons.cloud_download),
+          child: Icon(Icons.add_comment_sharp),
         ),
-      ),
+        body: posts.isEmpty ? buildEmptyView() : buildPostList());
+  }
+
+  Widget buildEmptyView() {
+    return Center(
+      child: ElevatedButton(
+          onPressed: () {
+            getPosts();
+          },
+          child: Text('press me')),
     );
   }
 
-  Widget bodyWidget() {
-    return Container(
-      padding: EdgeInsets.all(10),
-      child: Center(
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          child: _loading
-              ? Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    LinearProgressIndicator(value: _progressValue),
-                    Text(
-                      '${(_progressValue * 100).round()}%',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                      ),
-                    ),
-                  ],
-                )
-              : Text(
-                  "Press button to download",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                  ),
-                ),
-        ),
-      ),
-    );
-  }
-
-  void _updateProgress() {
-    const oneSec = Duration(seconds: 1);
-    Timer.periodic(oneSec, (Timer t) {
-      setState(() {
-        _progressValue += 0.02;
-        if (_progressValue.toStringAsFixed(1) == '1.0') {
-          _loading = false;
-          t.cancel();
-          _progressValue = 0.0;
-          return;
-        }
+  getPosts() async {
+    Uri url = Uri.parse("https://jsonplaceholder.typicode.com/posts");
+    var response = await http.get(url);
+    if (response.statusCode == 200) {
+      var list = jsonDecode(response.body) as List;
+      list.forEach((element) {
+        Post post = Post.fromJson(element);
+        posts.add(post);
       });
-    });
+      setState(() {});
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error ${response.reasonPhrase}")));
+    }
+  }
+
+  Widget buildPostList() {
+    return ListView.builder(
+        itemCount: posts.length,
+        itemBuilder: (BuildContext context, int index) {
+          return ListTile(
+            automaticallyImplyLeading: false,
+            leading: const Icon(Icons.chat, textDirection: TextDirection.ltr),
+            title: Text(posts[index].title),
+            subtitle: Text(posts[index].body),
+          );
+        });
+
+    /// Exercise 3 implement the ListView.builder() code here (search Internet if you forgot)
   }
 }
