@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:http/http.dart' as http;
 
-import 'AddPostScreen.dart' as AddPostScreen;
+import 'AddPostScreen.dart';
 import 'Post.dart';
 
 void main() => runApp(MyApp());
@@ -39,7 +40,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            //Navigator.push(context, AddPostScreen.getRoute(context));
+            Navigator.push(context, AddPostScreen.getRoute());
           },
           child: Icon(Icons.add_comment_sharp),
         ),
@@ -76,14 +77,14 @@ class _MyHomePageState extends State<MyHomePage> {
     return ListView.builder(
         itemCount: posts.length,
         itemBuilder: (BuildContext context, int index) {
-          return ListTile(
-            automaticallyImplyLeading: false,
-            leading: const Icon(Icons.chat, textDirection: TextDirection.ltr),
-            title: Text(posts[index].title),
-            subtitle: Text(posts[index].body),
-          );
+          return Column(children: [
+            ListTile(
+              leading: const Icon(Icons.comment),
+              title: Text(posts[index].title),
+              subtitle: Text(posts[index].body),
+            ),
+            Divider(),
+          ]);
         });
-
-    /// Exercise 3 implement the ListView.builder() code here (search Internet if you forgot)
   }
 }

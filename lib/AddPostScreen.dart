@@ -1,13 +1,15 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-//
 
 class AddPostScreen extends StatefulWidget {
-  /// make the screen introduce it self
-  static getRoute(BuildContext context) {
-    /// Exercise 4 return PageRouteBuilder to show this screen recap last lesson or search Internet if you forgot
-    return null;
+  static PageRouteBuilder getRoute() {
+    return PageRouteBuilder(
+        transitionsBuilder: (_, animation, secondAnimation, child) {
+      return FadeTransition(opacity: animation, child: child);
+    }, pageBuilder: (_, __, ___) {
+      return AddPostScreen();
+    });
   }
 
   const AddPostScreen({Key? key}) : super(key: key);
@@ -17,34 +19,57 @@ class AddPostScreen extends StatefulWidget {
 }
 
 class _AddPostScreenState extends State<AddPostScreen> {
+  TextEditingController titleController = TextEditingController();
+  TextEditingController commentController = TextEditingController();
+
+  @override
+  void dispose() {
+    titleController.dispose();
+    commentController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add new user'),
+        title: const Text('Add new post'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             TextField(
+              controller: titleController,
               decoration: const InputDecoration(
                 icon: Icon(Icons.title),
                 filled: true,
                 hintText: 'write title here...',
-                labelText: 'title ',
+                labelText: 'Title ',
               ),
             ),
-            SizedBox(
+            const SizedBox(
               height: 16,
             ),
-            TextField(),
-            SizedBox(
+            TextField(
+              minLines: 4,
+              maxLines: 8,
+              controller: commentController,
+              decoration: const InputDecoration(
+                icon: Icon(Icons.comment),
+                filled: true,
+                hintText: 'write comment here...',
+                labelText: 'Comment ',
+              ),
+            ),
+            const SizedBox(
               height: 16,
             ),
             ElevatedButton(
               onPressed: () {
-                /// Exercise 5 call addComment with Named parameter
+                addComment(
+                    title: titleController.text,
+                    comment: commentController.text);
               },
               child: Text("Add Comment".toUpperCase()),
             )
@@ -54,7 +79,23 @@ class _AddPostScreenState extends State<AddPostScreen> {
     );
   }
 
-  addComment() {
-    /// Exercise 5 call Post API here
+  addComment({required String title, required String comment}) async {
+    print("addcommenmt");
+    var response =
+        await http.post(Uri.parse("https://jsonplaceholder.typicode.com/posts"),
+            headers: {"Content-type": "application/json", "charset": "UTF-8"},
+            body: jsonEncode({
+              "title": "${title}",
+              "body": "${comment}",
+              "userId": 1,
+            }));
+    if (response.statusCode == 201) {
+      print(response.body);
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text("Post Added!")));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error ${response.reasonPhrase}")));
+    }
   }
 }
