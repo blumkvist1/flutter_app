@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "853654891122",
+    "project_id": "artdesign-flutter",
+    "storage_bucket": "artdesign-flutter.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:853654891122:android:61e4981fba94682e8d70eb",
+        "android_client_info": {
+          "package_name": "com.example.flutter_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAg8pUTrAA-PolbxyMfmzSZ1O5gF_UU6Wk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

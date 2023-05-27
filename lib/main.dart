@@ -1,97 +1,72 @@
-// ignore_for_file: prefer_const_constructors
-
-import 'dart:async';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
-void main() => runApp(MyFirstApp());
-
-class MyFirstApp extends StatefulWidget {
-  @override
-  State<StatefulWidget> createState() {
-    return _MyFirstAppState();
-  }
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(MyApp());
 }
 
-class _MyFirstAppState extends State<MyFirstApp> {
-  bool _loading = false;
-  double _progressValue = 0;
-
-  @override
-  void initState() {
-    _loading = false;
-    _progressValue = 0;
-    super.initState();
-  }
+class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-        backgroundColor: Colors.indigo,
-        appBar: AppBar(
-          leading: Icon(Icons.facebook),
-          title: const Text("facebook"),
-          centerTitle: true,
-        ),
-        body: bodyWidget(),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            setState(() {
-              _loading = !_loading;
-              _updateProgress();
-            });
-          },
-          child: Icon(Icons.cloud_download),
-        ),
+      theme: ThemeData(
+          colorScheme: ColorScheme.fromSwatch(
+              primarySwatch: Colors.deepPurple,
+              accentColor: Colors.deepOrangeAccent)),
+      home: MyArtApp(),
+    );
+  }
+}
+
+class MyArtApp extends StatefulWidget {
+  MyArtApp({Key? key}) : super(key: key);
+
+  @override
+  State<MyArtApp> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyArtApp> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("FireBase"),
       ),
+      body: FutureBuilder(
+        /// Initialize FlutterFire:
+        future: getArt(),
+        builder: (context, snapshot) {
+          /// if Error
+          if (snapshot.hasError) {
+            return Text('${snapshot.error}');
+          }
+
+          /// On completion
+          if (snapshot.connectionState == ConnectionState.done) {
+            return Center(child: Text('${snapshot.data}'));
+          }
+
+          /// On Loading
+          return Center(
+              child: CircularProgressIndicator(
+        strokeWidth: 3,
+      ));
+    },
+    ),
     );
   }
 
-  Widget bodyWidget() {
-    return Container(
-      padding: EdgeInsets.all(10),
-      child: Center(
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          child: _loading
-              ? Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    LinearProgressIndicator(value: _progressValue),
-                    Text(
-                      '${(_progressValue * 100).round()}%',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                      ),
-                    ),
-                  ],
-                )
-              : Text(
-                  "Press button to download",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                  ),
-                ),
-        ),
-      ),
-    );
-  }
-
-  void _updateProgress() {
-    const oneSec = Duration(seconds: 1);
-    Timer.periodic(oneSec, (Timer t) {
-      setState(() {
-        _progressValue += 0.02;
-        if (_progressValue.toStringAsFixed(1) == '1.0') {
-          _loading = false;
-          t.cancel();
-          _progressValue = 0.0;
-          return;
-        }
-      });
+  getArt() async {
+    await FirebaseFirestore.instance.collection("users").get().then((event) {
+      print(event.size);
+      for (var doc in event.docs) {
+        print(doc["name"]);
+      }
     });
   }
 }
